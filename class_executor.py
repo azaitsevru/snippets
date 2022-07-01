@@ -1,6 +1,9 @@
 import inspect
 import types
 from datetime import datetime
+from typing import Any
+
+from json2object import json_2_object
 
 
 # datetime.datetime.fromtimestamp(ms/1000.0)
@@ -45,18 +48,28 @@ class Stage(metaclass=StageMeta):
         for job in cls.get_jobs():
             job(cls)
 
+    @classmethod
+    def set_value(cls, name: str, data: Any):
+        cls.context[inspect.stack()[1][3]].update({
+            name: data
+        })
+
+    @classmethod
+    def get_context(cls):
+        return json_2_object(cls.context)
+
 
 class Work1(Stage):
     def job_3(self):
-        print('job3')
+        print(self.get_context().job_2.do_build)
 
     def job_1(self):
-        print('job1')
+        pass
 
     def job_2(self):
-        print('job2')
+        self.set_value('do_build', True)
 
 
 w = Work1()
 w.run()
-print(w.context)
+# print(w.context)
