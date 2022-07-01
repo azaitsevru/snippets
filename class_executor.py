@@ -29,15 +29,6 @@ class StageMeta(type):
 
         return super(StageMeta, cls).__new__(cls, name, bases, attrs)
 
-    @classmethod
-    def deco(cls, func):
-        def wrapper(*args, **kwargs):
-            print(f'before {func}')
-            result = func(*args, **kwargs)
-            print(f'after {func}')
-            return result
-        return wrapper
-
 
 class Stage(metaclass=StageMeta):
     @classmethod
