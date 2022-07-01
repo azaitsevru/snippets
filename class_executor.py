@@ -1,13 +1,29 @@
-import cProfile
 import inspect
 import types
+from datetime import datetime
+
+
+# datetime.datetime.fromtimestamp(ms/1000.0)
+def func_deco(func):
+    def wrapper(self, *args, **kwargs):
+        self.context[func.__name__] = {
+            'start': round(datetime.now().timestamp()*1000)
+        }
+
+        result = func(self, *args, **kwargs)
+
+        self.context[func.__name__].update({
+            'stop': round(datetime.now().timestamp()*1000)
+        })
+        return result
+    return wrapper
 
 
 class StageMeta(type):
     def __new__(cls, name, bases, attrs):
         for attr_name, attr_value in attrs.items():
             if isinstance(attr_value, types.FunctionType) and not attr_name.startswith('_'):
-                attrs[attr_name] = cls.deco(attr_value)
+                attrs[attr_name] = func_deco(attr_value)
 
         attrs['context'] = {}
 
@@ -39,19 +55,17 @@ class Stage(metaclass=StageMeta):
             job(cls)
 
 
-class Executor:
-    pass
-
-
 class Work1(Stage):
     def job_3(self):
         print('job3')
-        print(self.context)
 
     def job_1(self):
         print('job1')
-        print(self.context)
 
     def job_2(self):
         print('job2')
-        print(self.context)
+
+
+w = Work1()
+w.run()
+print(w.context)
